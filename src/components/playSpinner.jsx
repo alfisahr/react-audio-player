@@ -104,6 +104,11 @@ const BarFive = styled.div`
    animation-timing-function: linear;
    animation-iteration-count: infinite;
 `;
+const BarPause = styled.div`
+   width: 3px;
+   height: 25%;
+   background-color: #666;
+`;
 
 function PlaySpinner() {
    return (
@@ -113,6 +118,18 @@ function PlaySpinner() {
          <BarThree />
          <BarFour />
          <BarFive />
+      </SpinnerContainer>
+   );
+}
+
+export function PauseSpinner() {
+   return (
+      <SpinnerContainer>
+         <BarPause />
+         <BarPause />
+         <BarPause />
+         <BarPause />
+         <BarPause />
       </SpinnerContainer>
    );
 }

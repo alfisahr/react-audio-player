@@ -5,7 +5,7 @@ import AppContext from "../AppContext";
 import MusicNote from "@material-ui/icons/MusicNote";
 import PlayArrow from "@material-ui/icons/PlayArrow";
 import PauseIcon from "@material-ui/icons/Pause";
-import PlaySpinner from "./playSpinner";
+import PlaySpinner, { PauseSpinner } from "./playSpinner";
 import { playSong, selectedSong } from "../stores/action";
 
 const SongList = ({ songs, songPlay, common }) => {
@@ -51,9 +51,11 @@ const SongList = ({ songs, songPlay, common }) => {
       dispatch(selectedSong(id));
    };
 
-   function iconItem(isPlaying, playingId, id, isHover) {
-      if (isPlaying && playingId === id) {
+   function iconItem(songState, playingId, id, isHover) {
+      if (songState === "onPlay" && playingId === id) {
          return isHover ? <PauseIcon /> : <PlaySpinner />;
+      } else if (songState === "onPause" && playingId === id) {
+         return isHover ? <PlayArrow /> : <PauseSpinner />;
       } else {
          return isHover ? <PlayArrow /> : <MusicNote />;
       }
@@ -73,11 +75,13 @@ const SongList = ({ songs, songPlay, common }) => {
                         >
                            <div className="btn-play">
                               <button
-                                 onClick={(e) => handleClick(e, { id: i, name: song.name, isPlaying: true })}
+                                 onClick={(e) =>
+                                    handleClick(e, { id: i, name: song.name, isPlaying: true, songStated: "onPlay" })
+                                 }
                                  onMouseEnter={(e) => handleMouseEnter(e, i)}
                                  onMouseLeave={(e) => handleMouseLeave(e, i)}
                               >
-                                 {iconItem(songPlay.isPlaying, songPlay.id, i, song.hover)}
+                                 {iconItem(songPlay.songStated, songPlay.id, i, song.hover)}
                               </button>
                            </div>
                            <div className="song-name">{song.name}</div>

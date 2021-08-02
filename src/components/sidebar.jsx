@@ -1,4 +1,5 @@
 import MusicNote from "@material-ui/icons/MusicNote";
+import Playlist from "./playlist";
 
 const Sidebar = () => {
    return (
@@ -9,12 +10,7 @@ const Sidebar = () => {
             </div>{" "}
             <h1>Audio Player</h1>
          </div>
-         <div className="playlist">
-            <h3 className="title">Playlist</h3>
-            <ul className="list">
-               <li>Default</li>
-            </ul>
-         </div>
+         <Playlist />
       </div>
    );
 };
