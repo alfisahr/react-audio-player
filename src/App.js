@@ -1,34 +1,39 @@
 import { useEffect, useState } from "react";
-import { connect } from "react-redux";
+import { connect, useDispatch } from "react-redux";
+import { bindActionCreators } from "redux";
 import AppContext from "./AppContext";
 import localForage from "localforage";
 import Sidebar from "./components/sidebar";
 import MainBar from "./components/mainBar";
+import { playSong } from "./stores/action";
 import "./App.css";
 
-function App({ songs, songPlay }) {
+function App({ songs, songPlay, common }) {
+   const dispatch = useDispatch();
    const [songsFromStorage, setSongsFromStorage] = useState([]);
    const [onPlayDuration, setOnPlayDuration] = useState(0);
    const [onPlayCurrentTime, setOnPlayCurrentTime] = useState(0);
    const [onPlayNext, setOnPlayNext] = useState(-1);
    const [onPlayPrev, setOnPlayPrev] = useState(-1);
+   const [songEnded, setSongEnded] = useState(false);
    useEffect(() => {
       if (songs.length > 0) {
-         async function getSongsFromStorage() {
-            try {
-               const lf = await localForage.getItem("state");
-               let songFile = [];
-               for (let x = 0; x < songs.length; x++) {
-                  if (lf.songs[x]) {
-                     songFile.push(lf.songs[x]);
-                  }
-               }
-               setSongsFromStorage(songFile);
-            } catch (err) {
-               console.log(err);
-            }
-         }
-         getSongsFromStorage();
+         // async function getSongsFromStorage() {
+         //    try {
+         //       const lf = await localForage.getItem("state");
+         //       let songFile = [];
+         //       for (let x = 0; x < songs.length; x++) {
+         //          if (lf.songs[x]) {
+         //             songFile.push(lf.songs[x]);
+         //          }
+         //       }
+         //       setSongsFromStorage(songFile);
+         //    } catch (err) {
+         //       console.log(err);
+         //    }
+         // }
+         // console.log(songs);
+         // getSongsFromStorage();
       }
    }, [songs]);
 
@@ -49,8 +54,21 @@ function App({ songs, songPlay }) {
    };
 
    useEffect(() => {
+      if (!songEnded) return;
+      dispatch(
+         playSong({
+            id: onPlayNext,
+            name: songsFromStorage[onPlayNext].name,
+            isPlaying: true,
+            songStated: "onPlay",
+         })
+      );
+      setSongEnded(false);
+   }, [songEnded, dispatch, onPlayNext, songsFromStorage]);
+
+   useEffect(() => {
       const audio_player = document.getElementById("audio_player");
-      audio_player.onended = () => console.log("end song");
+      audio_player.onended = () => setSongEnded(true);
       if (songPlay.songStated === "onPlay") {
          async function playSong() {
             try {
@@ -67,6 +85,7 @@ function App({ songs, songPlay }) {
                   setOnPlayNext(getNextSong(songPlay.id, songsFromStorage.length));
                   setOnPlayPrev(getPrevSong(songPlay.id, songsFromStorage.length));
                });
+               // audio_player.volume = common.volume;
             } catch (err) {
                console.log(err);
             }
@@ -93,6 +112,7 @@ function App({ songs, songPlay }) {
    );
 }
 
-const mapStateToProps = (state) => ({ songs: state.songs, songPlay: state.songPlay });
+const mapStateToProps = (state) => ({ songs: state.songs, songPlay: state.songPlay, common: state.common });
+const mapDispatchToProps = (dispatch) => bindActionCreators({ playSong }, dispatch);
 
-export default connect(mapStateToProps)(App);
+export default connect(mapStateToProps, mapDispatchToProps)(App);

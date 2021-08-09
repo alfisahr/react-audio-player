@@ -1,153 +1,76 @@
-import { useState, Fragment } from "react";
+import { useState } from "react";
+import { connect, useDispatch } from "react-redux";
+import { bindActionCreators } from "redux";
 import styled from "styled-components";
 import Grid from "@material-ui/core/Grid";
 import VolumeDown from "@material-ui/icons/VolumeDown";
 import VolumeUp from "@material-ui/icons/VolumeUp";
-
-// excess height to improve interactive area / accessibility
-const height = "36px";
-const thumbHeight = 16;
-const trackHeight = "16px";
-// colours
-const upperColor = "#edf5f9";
-const lowerColor = "#0199ff";
-const thumbColor = "#ddd";
-const thumbHoverColor = "#ccc";
-const upperBackground = `linear-gradient(to bottom, ${upperColor}, ${upperColor}) 100% 50% / 100% ${trackHeight} no-repeat transparent`;
-const lowerBackground = `linear-gradient(to bottom, ${lowerColor}, ${lowerColor}) 100% 50% / 100% ${trackHeight} no-repeat transparent`;
-
-const makeLongShadow = (color, size) => {
-   let i = 18;
-   let shadow = `${i}px 0 0 ${size} ${color}`;
-
-   for (; i < 706; i++) {
-      shadow = `${shadow}, ${i}px 0 0 ${size} ${color}`;
-   }
-
-   return shadow;
-};
+import { changeVolume } from "../stores/action";
 
 const Range = styled.input`
-   overflow: hidden;
-   display: block;
-   appearance: none;
-   max-width: 700px;
+   -webkit-appearance: none;
    width: 100%;
-   margin: 0;
-   height: ${height};
-   cursor: pointer;
+   height: 15px;
+   border-radius: 5px;
+   background: #999;
+   outline: none;
+   opacity: 0.7;
+   -webkit-transition: 0.2s;
+   transition: opacity 0.2s;
 
-   &:focus {
-      outline: none;
-   }
-
-   &::-webkit-slider-runnable-track {
-      width: 100%;
-      height: ${height};
-      background: ${lowerBackground};
+   &:hover {
+      opacity: 1;
    }
 
    &::-webkit-slider-thumb {
-      position: relative;
+      -webkit-appearance: none;
       appearance: none;
-      height: ${thumbHeight}px;
-      width: ${thumbHeight}px;
-      background: ${thumbColor};
-      border-radius: 100%;
-      border: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      box-shadow: ${makeLongShadow(upperColor, "-10px")};
-      transition: background-color 150ms;
-   }
-
-   &::-moz-range-track,
-   &::-moz-range-progress {
-      width: 100%;
-      height: ${height};
-      background: ${upperBackground};
-   }
-
-   &::-moz-range-progress {
-      background: ${lowerBackground};
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      background: #04aa6d;
+      cursor: pointer;
    }
 
    &::-moz-range-thumb {
-      appearance: none;
-      margin: 0;
-      height: ${thumbHeight};
-      width: ${thumbHeight};
-      background: ${thumbColor};
-      border-radius: 100%;
-      border: 0;
-      transition: background-color 150ms;
-   }
-
-   &::-ms-track {
-      width: 100%;
-      height: ${height};
-      border: 0;
-      /* color needed to hide track marks */
-      color: transparent;
-      background: transparent;
-   }
-
-   &::-ms-fill-lower {
-      background: ${lowerBackground};
-   }
-
-   &::-ms-fill-upper {
-      background: ${upperBackground};
-   }
-
-   &::-ms-thumb {
-      appearance: none;
-      height: ${thumbHeight};
-      width: ${thumbHeight};
-      background: ${thumbColor};
-      border-radius: 100%;
-      border: 0;
-      transition: background-color 150ms;
-      /* IE Edge thinks it can support -webkit prefixes */
-      top: 0;
-      margin: 0;
-      box-shadow: none;
-   }
-
-   &:hover,
-   &:focus {
-      &::-webkit-slider-thumb {
-         background-color: ${thumbHoverColor};
-      }
-      &::-moz-range-thumb {
-         background-color: ${thumbHoverColor};
-      }
-      &::-ms-thumb {
-         background-color: ${thumbHoverColor};
-      }
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      background: #04aa6d;
+      cursor: pointer;
    }
 `;
 
-const Volume = () => {
-   // const [value, setValue] = useState(10);
-   // function handleChange(e, newVal) {
-   //    setValue(newVal);
-   // }
+const Volume = ({ common }) => {
+   const dispatch = useDispatch();
+   const val = common.volume * 100;
+   const [value, setValue] = useState(val);
+   function handleChange(e) {
+      // console.log(e.target.value);
+      setValue(e.target.value);
+      const newVal = parseInt(value / 100, 10);
+      dispatch(changeVolume(newVal));
+      // e.target.style.backgroundColor = `linear-gradient(to right,#4BD663,#4BD663 ${e.target.value}%,#eee ${e.target.value}%)`;
+      // console.log(e.target.style.backgroundColor);
+      // console.log(e.target.value);
+   }
    return (
-      <Fragment>
+      <div className="volume-wrapper">
          <Grid container spacing={1}>
             <Grid item>
                <VolumeDown />
             </Grid>
             <Grid item xs>
-               <Range type="range" />
+               <Range type="range" min="1" max="100" value={value} onChange={handleChange} />
             </Grid>
             <Grid item>
                <VolumeUp />
             </Grid>
          </Grid>
-      </Fragment>
+      </div>
    );
 };
 
-export default Volume;
+const mapStateToProps = (state) => ({ common: state.common });
+const mapDispatchToProps = (dispatch) => bindActionCreators({ changeVolume }, dispatch);
+export default connect(mapStateToProps, mapDispatchToProps)(Volume);

@@ -12,7 +12,7 @@ import ProgressBar from "./progressBar";
 import Volume from "./volume";
 import { playSong, pauseSong, resumeSong } from "../stores/action";
 
-const PlayBar = ({ songPlay }) => {
+const PlayBar = ({ songPlay, common }) => {
    const dispatch = useDispatch();
    const appContext = useContext(AppContext);
 
@@ -24,10 +24,9 @@ const PlayBar = ({ songPlay }) => {
          dispatch(resumeSong());
          console.log("btn resume");
       } else {
-         dispatch(
-            playSong({ id: 0, name: appContext.songsFromStorage[0].name, isPlaying: true, songStated: "onPlay" })
-         );
-         console.log("btn play");
+         const id = common.selectedSong === -1 ? 0 : common.selectedSong;
+         dispatch(playSong({ id, name: appContext.songsFromStorage[id].name, isPlaying: true, songStated: "onPlay" }));
+         console.log("btn play " + common.selectedSong);
       }
    };
 
@@ -60,7 +59,7 @@ const PlayBar = ({ songPlay }) => {
    };
    return (
       <div className="playbar">
-         <Grid container>
+         <Grid container alignItems="center">
             <Grid item sm={3}>
                <div className="control-buttons">
                   <button className="rewind" onClick={handlePrevBtn}>
@@ -85,7 +84,7 @@ const PlayBar = ({ songPlay }) => {
    );
 };
 
-const mapStateToProps = (state) => ({ songPlay: state.songPlay });
+const mapStateToProps = (state) => ({ songPlay: state.songPlay, common: state.common });
 const mapDispatchToProps = (dispatch) => bindActionCreators({ playSong, pauseSong, resumeSong }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(PlayBar);

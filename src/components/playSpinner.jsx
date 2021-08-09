@@ -1,8 +1,8 @@
 import styled, { keyframes } from "styled-components";
 
 const SpinnerContainer = styled.div`
-   height: 27px;
-   width: 24px;
+   height: 23px;
+   width: 20px;
    display: flex;
    flex-direction: row;
    justify-content: space-around;

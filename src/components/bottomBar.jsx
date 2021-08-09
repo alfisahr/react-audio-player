@@ -5,6 +5,7 @@ import IconButton from "@material-ui/core/IconButton";
 import InfoIcon from "@material-ui/icons/Info";
 import Brightness4Icon from "@material-ui/icons/Brightness4";
 import AddIcon from "@material-ui/icons/Add";
+import DeleteIcon from '@material-ui/icons/Delete'
 
 const BottomBar = () => {
    const dispatch = useDispatch();
@@ -18,13 +19,18 @@ const BottomBar = () => {
             <input type="file" id="file" onChange={oneSong} />
             <label htmlFor="file">
                <div className="icon">
-                  <AddIcon />
+                  <AddIcon fontSize="small" />
                </div>
                <div className="caption">Add song</div>
             </label>
          </div>
          <div className="clear-songs">
-            <button>Clear all</button>
+            <button className="clear-all">
+               <div className="icon">
+                  <DeleteIcon fontSize="small" />
+               </div>
+               <div className="caption">Clear all</div>
+            </button>
          </div>
          <div className="bottom-navigation">
             <IconButton>
