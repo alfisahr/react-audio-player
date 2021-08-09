@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { connect, useDispatch } from "react-redux";
 import { bindActionCreators } from "redux";
 import AppContext from "./AppContext";
-import localForage from "localforage";
 import Sidebar from "./components/sidebar";
 import MainBar from "./components/mainBar";
 import { playSong } from "./stores/action";
@@ -10,32 +9,11 @@ import "./App.css";
 
 function App({ songs, songPlay, common }) {
    const dispatch = useDispatch();
-   const [songsFromStorage, setSongsFromStorage] = useState([]);
    const [onPlayDuration, setOnPlayDuration] = useState(0);
    const [onPlayCurrentTime, setOnPlayCurrentTime] = useState(0);
    const [onPlayNext, setOnPlayNext] = useState(-1);
    const [onPlayPrev, setOnPlayPrev] = useState(-1);
    const [songEnded, setSongEnded] = useState(false);
-   useEffect(() => {
-      if (songs.length > 0) {
-         // async function getSongsFromStorage() {
-         //    try {
-         //       const lf = await localForage.getItem("state");
-         //       let songFile = [];
-         //       for (let x = 0; x < songs.length; x++) {
-         //          if (lf.songs[x]) {
-         //             songFile.push(lf.songs[x]);
-         //          }
-         //       }
-         //       setSongsFromStorage(songFile);
-         //    } catch (err) {
-         //       console.log(err);
-         //    }
-         // }
-         // console.log(songs);
-         // getSongsFromStorage();
-      }
-   }, [songs]);
 
    const getNextSong = (extId, length) => {
       extId++;
@@ -58,13 +36,13 @@ function App({ songs, songPlay, common }) {
       dispatch(
          playSong({
             id: onPlayNext,
-            name: songsFromStorage[onPlayNext].name,
+            name: songs[onPlayNext].name,
             isPlaying: true,
             songStated: "onPlay",
          })
       );
       setSongEnded(false);
-   }, [songEnded, dispatch, onPlayNext, songsFromStorage]);
+   }, [songEnded, dispatch, onPlayNext, songs]);
 
    useEffect(() => {
       const audio_player = document.getElementById("audio_player");
@@ -72,7 +50,7 @@ function App({ songs, songPlay, common }) {
       if (songPlay.songStated === "onPlay") {
          async function playSong() {
             try {
-               const audio_src = await URL.createObjectURL(songsFromStorage[songPlay.id]);
+               const audio_src = await URL.createObjectURL(songs[songPlay.id]);
                audio_player.src = audio_src;
                audio_player.play();
                console.log("play");
@@ -82,8 +60,8 @@ function App({ songs, songPlay, common }) {
                   setOnPlayDuration(audio_player.duration);
                   console.log(audio_player.duration);
                   // console.log(`${minutes}:${seconds}`);
-                  setOnPlayNext(getNextSong(songPlay.id, songsFromStorage.length));
-                  setOnPlayPrev(getPrevSong(songPlay.id, songsFromStorage.length));
+                  setOnPlayNext(getNextSong(songPlay.id, songs.length));
+                  setOnPlayPrev(getPrevSong(songPlay.id, songs.length));
                });
                // audio_player.volume = common.volume;
             } catch (err) {
@@ -99,10 +77,10 @@ function App({ songs, songPlay, common }) {
          audio_player.play();
          console.log("resume");
       }
-   }, [songPlay, songsFromStorage]);
+   }, [songs, songPlay]);
 
    return (
-      <AppContext.Provider value={{ songsFromStorage, onPlayDuration, onPlayCurrentTime, onPlayNext, onPlayPrev }}>
+      <AppContext.Provider value={{ onPlayDuration, onPlayCurrentTime, onPlayNext, onPlayPrev }}>
          <div className="page-wrapper">
             <audio id="audio_player" preload="metadata" />
             <Sidebar />

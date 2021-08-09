@@ -29,9 +29,6 @@ const SongList = ({ songs, songPlay, common }) => {
             return { name: song.name, hover: false, isPlaying: false };
          });
          setSongList(reArrayOfSongs);
-         for(let x = 0; x < songs.length; x++) {
-            console.log(songs[x].name);
-         }
       }
    }, [songs, contextSongs.songsFromStorage]);
 
