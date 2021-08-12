@@ -1,7 +1,8 @@
-import { PLAY_SONG, PAUSE_SONG, RESUME_SONG } from "./action";
+import { READY_TO_PLAY, PLAY_SONG, PAUSE_SONG, RESUME_SONG } from "./action";
 
 const initState = {
    isPlaying: false,
+   readyToPlay: false, // when button clicked until song really played
    songStated: "none", // it can be none, onPlay, onPause, onResume
    id: -1,
    name: "",
@@ -9,6 +10,8 @@ const initState = {
 
 const songPlay = (state = initState, action) => {
    switch (action.type) {
+      case READY_TO_PLAY:
+         return { ...state, readyToPlay: true, id: action.id };
       case PLAY_SONG:
          return { ...state, ...action.data };
       case PAUSE_SONG:

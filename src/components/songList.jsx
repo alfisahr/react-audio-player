@@ -6,20 +6,27 @@ import MusicNote from "@material-ui/icons/MusicNote";
 import PlayArrow from "@material-ui/icons/PlayArrow";
 import PauseIcon from "@material-ui/icons/Pause";
 import DeleteIcon from "@material-ui/icons/Delete";
-import useComponentVisible from "./outsideClick";
+import { grey } from "@material-ui/core/colors";
+// import useComponentVisible from "./outsideClick";
 import PlaySpinner, { PauseSpinner } from "./playSpinner";
-import { playSong, selectedSong, unSelectedSong, removeSong } from "../stores/action";
+import {
+   readyToPlay,
+   selectedSong,
+   unSelectedSong,
+   removeSong,
+} from "../stores/action";
 
 const SongList = ({ songs, songPlay, common }) => {
    const dispatch = useDispatch();
 
-   const { ref, isComponentVisible, setIsComponentVisible } = useComponentVisible(true);
-   useEffect(() => {
-      if (!isComponentVisible) {
-         dispatch(unSelectedSong());
-      }
-      console.log(isComponentVisible);
-   }, [isComponentVisible, dispatch]);
+   // const { ref, isComponentVisible, setIsComponentVisible } =
+   //    useComponentVisible(true);
+   // useEffect(() => {
+   //    if (!isComponentVisible) {
+   //       dispatch(unSelectedSong());
+   //    }
+   //    console.log(isComponentVisible);
+   // }, [isComponentVisible, dispatch]);
 
    const contextSongs = useContext(AppContext);
    const [songList, setSongList] = useState([]);
@@ -54,13 +61,13 @@ const SongList = ({ songs, songPlay, common }) => {
       setSongList(arr2);
    };
 
-   const handleClick = (e, id) => {
-      dispatch(playSong(id));
+   const handleClick = (e, i) => {
+      dispatch(readyToPlay(i));
    };
 
    const handleRowSelection = (e, id) => {
       dispatch(selectedSong(id));
-      setIsComponentVisible(true);
+      // setIsComponentVisible(true);
    };
 
    function iconItem(songState, playingId, id, isHover) {
@@ -69,7 +76,11 @@ const SongList = ({ songs, songPlay, common }) => {
       } else if (songState === "onPause" && playingId === id) {
          return isHover ? <PlayArrow fontSize="small" /> : <PauseSpinner />;
       } else {
-         return isHover ? <PlayArrow fontSize="small" /> : <MusicNote fontSize="small" />;
+         return isHover ? (
+            <PlayArrow fontSize="small" />
+         ) : (
+            <MusicNote fontSize="small" />
+         );
       }
    }
 
@@ -78,10 +89,16 @@ const SongList = ({ songs, songPlay, common }) => {
       console.log(id);
    };
 
+   const unHighlightSong = (e) => {
+      if(common.selectedSong >= 0 && e.target.nodeName.toLowerCase() === 'div') {
+         dispatch(unSelectedSong());
+      }
+   };
+
    if (songList.length > 0) {
       return (
-         <div className="song-list-container">
-            <table ref={ref} className="tb-songlist">
+         <div className="song-list-container" onClick={unHighlightSong}>
+            <table className="tb-songlist">
                <thead>
                   <tr>
                      <td colSpan="2">Song</td>
@@ -97,22 +114,22 @@ const SongList = ({ songs, songPlay, common }) => {
                            <tr
                               onClick={(e) => handleRowSelection(e, i)}
                               key={i}
-                              className={i === common.selectedSong ? "selected" : ""}
+                              className={
+                                 i === common.selectedSong ? "selected" : ""
+                              }
                            >
                               <td className="btn-play">
                                  <button
-                                    onClick={(e) =>
-                                       handleClick(e, {
-                                          id: i,
-                                          name: song.name,
-                                          isPlaying: true,
-                                          songStated: "onPlay",
-                                       })
-                                    }
+                                    onClick={(e) => handleClick(e, i)}
                                     onMouseEnter={(e) => handleMouseEnter(e, i)}
                                     onMouseLeave={(e) => handleMouseLeave(e, i)}
                                  >
-                                    {iconItem(songPlay.songStated, songPlay.id, i, song.hover)}
+                                    {iconItem(
+                                       songPlay.songStated,
+                                       songPlay.id,
+                                       i,
+                                       song.hover
+                                    )}
                                  </button>
                               </td>
                               <td>{song.name}</td>
@@ -120,7 +137,10 @@ const SongList = ({ songs, songPlay, common }) => {
                               <td>#</td>
                               <td>#</td>
                               <td>
-                                 <button className="del-song" onClick={(e) => handleRemoveSong(e, i)}>
+                                 <button
+                                    className="del-song"
+                                    onClick={(e) => handleRemoveSong(e, i)}
+                                 >
                                     <DeleteIcon fontSize="small" />
                                  </button>
                               </td>
@@ -132,12 +152,28 @@ const SongList = ({ songs, songPlay, common }) => {
          </div>
       );
    } else {
-      return <div className="song-list-container">ga ada file</div>;
+      return (
+         <div className="song-list-container empty-song">
+            <div className="no-song">
+               <div className="icon">
+                  <MusicNote style={{ color: grey[300], fontSize: 180 }} />
+               </div>
+               <h3 className="caption">Songs are empty</h3>
+            </div>
+         </div>
+      );
    }
 };
 
-const mapStateToProps = (state) => ({ songs: state.songs, songPlay: state.songPlay, common: state.common });
+const mapStateToProps = (state) => ({
+   songs: state.songs,
+   songPlay: state.songPlay,
+   common: state.common,
+});
 const mapDispatchToProps = (dispatch) =>
-   bindActionCreators({ playSong, selectedSong, unSelectedSong, removeSong }, dispatch);
+   bindActionCreators(
+      { readyToPlay, selectedSong, unSelectedSong, removeSong },
+      dispatch
+   );
 
 export default connect(mapStateToProps, mapDispatchToProps)(SongList);

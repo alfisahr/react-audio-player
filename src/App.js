@@ -38,7 +38,8 @@ function App({ songs, songPlay, common }) {
             id: onPlayNext,
             name: songs[onPlayNext].name,
             isPlaying: true,
-            songStated: "onPlay",
+            readyToPlay: true,
+            songStated: "none",
          })
       );
       setSongEnded(false);
@@ -47,8 +48,8 @@ function App({ songs, songPlay, common }) {
    useEffect(() => {
       const audio_player = document.getElementById("audio_player");
       audio_player.onended = () => setSongEnded(true);
-      if (songPlay.songStated === "onPlay") {
-         async function playSong() {
+      if (songPlay.readyToPlay) {
+         async function playTheSong() {
             try {
                const audio_src = await URL.createObjectURL(songs[songPlay.id]);
                audio_player.src = audio_src;
@@ -63,12 +64,21 @@ function App({ songs, songPlay, common }) {
                   setOnPlayNext(getNextSong(songPlay.id, songs.length));
                   setOnPlayPrev(getPrevSong(songPlay.id, songs.length));
                });
+               dispatch(
+                     playSong({
+                        name: songs[songPlay.id].name,
+                        isPlaying: true,
+                        songStated: "onPlay",
+                        readyToPlay: false,
+                     })
+                  );
                // audio_player.volume = common.volume;
             } catch (err) {
                console.log(err);
             }
          }
-         playSong();
+         playTheSong();
+         console.log('crap')
       } else if (songPlay.songStated === "onPause") {
          audio_player.pause();
          setOnPlayCurrentTime(audio_player.currentTime);
@@ -77,10 +87,12 @@ function App({ songs, songPlay, common }) {
          audio_player.play();
          console.log("resume");
       }
-   }, [songs, songPlay]);
+   }, [songs, songPlay, dispatch]);
 
    return (
-      <AppContext.Provider value={{ onPlayDuration, onPlayCurrentTime, onPlayNext, onPlayPrev }}>
+      <AppContext.Provider
+         value={{ onPlayDuration, onPlayCurrentTime, onPlayNext, onPlayPrev }}
+      >
          <div className="page-wrapper">
             <audio id="audio_player" preload="metadata" />
             <Sidebar />
@@ -90,7 +102,12 @@ function App({ songs, songPlay, common }) {
    );
 }
 
-const mapStateToProps = (state) => ({ songs: state.songs, songPlay: state.songPlay, common: state.common });
-const mapDispatchToProps = (dispatch) => bindActionCreators({ playSong }, dispatch);
+const mapStateToProps = (state) => ({
+   songs: state.songs,
+   songPlay: state.songPlay,
+   common: state.common,
+});
+const mapDispatchToProps = (dispatch) =>
+   bindActionCreators({ playSong }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

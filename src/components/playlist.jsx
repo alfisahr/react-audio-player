@@ -6,9 +6,15 @@ import QueueMusicIcon from "@material-ui/icons/QueueMusic";
 import CloseIcon from "@material-ui/icons/Close";
 import EditIcon from "@material-ui/icons/Edit";
 import CheckIcon from "@material-ui/icons/Check";
-import { addPlaylist, editPlaylist, deletePlaylist } from "../stores/action";
+import {
+   addPlaylist,
+   editPlaylist,
+   deletePlaylist,
+   selectedPlaylist,
+   unSelectedPlaylist,
+} from "../stores/action";
 
-const Playlist = ({ playlist }) => {
+const Playlist = ({ playlist, activePlaylist }) => {
    const dispatch = useDispatch();
    const initNewPlaylist = { id: -1, new: false, name: "" };
    const [newPlaylist, setNewPlaylist] = useState(initNewPlaylist);
@@ -27,11 +33,26 @@ const Playlist = ({ playlist }) => {
    const handleInputChange = (e) => {
       setNewPlaylist({ ...newPlaylist, [e.target.name]: e.target.value });
    };
+   const handleDelete = (id) => {
+      dispatch(deletePlaylist(id));
+      setNewPlaylist({ ...newPlaylist, new: false });
+   };
+   const handleUnselected = (e) => {
+      if (
+         activePlaylist > -1 &&
+         e.target.className === "playlist"
+      ) {
+         dispatch(unSelectedPlaylist());
+      }
+   };
    return (
-      <div className="playlist">
+      <div className="playlist" onClick={handleUnselected} style={{height: 'calc(100% - 100px)'}}>
          <div className="caption">
             <h3 className="title">Playlist</h3>
-            <button disabled={newPlaylist.new ? true : false} onClick={handleAdd}>
+            <button
+               disabled={newPlaylist.new ? true : false}
+               onClick={handleAdd}
+            >
                <PlaylistAddIcon />
             </button>
          </div>
@@ -40,30 +61,56 @@ const Playlist = ({ playlist }) => {
             {playlist &&
                playlist.map((pl, i) => {
                   return (
-                     <li key={i}>
+                     <li
+                        key={i}
+                        onClick={() => dispatch(selectedPlaylist(pl.id))}
+                        className={activePlaylist === pl.id ? "selected" : ""}
+                     >
                         <div className="icon">
                            <QueueMusicIcon />
                         </div>
                         <div className="playlist-name">
                            {newPlaylist.id === pl.id ? (
-                              <input type="text" name="name" onChange={handleInputChange} value={newPlaylist.name} />
+                              <input
+                                 type="text"
+                                 autoFocus={true}
+                                 name="name"
+                                 onChange={handleInputChange}
+                                 value={newPlaylist.name}
+                              />
                            ) : (
                               pl.name
                            )}
                         </div>
-                        <div className={pl.id === newPlaylist.id ? `pnav` : `pnav hide`}>
+                        <div
+                           className={
+                              pl.id === newPlaylist.id ? `pnav` : `pnav hide`
+                           }
+                        >
                            {pl.id === newPlaylist.id ? (
                               <button onClick={handleConfirm}>
-                                 <CheckIcon fontSize="small" />
+                                 <CheckIcon style={{ fontSize: "13px" }} />
                               </button>
                            ) : (
-                              <button onClick={(e) => handleEdit(e, { id: pl.id, new: true, name: pl.name })}>
-                                 <EditIcon fontSize="small" />
+                              <button
+                                 disabled={i === 0 ? true : false}
+                                 onClick={(e) =>
+                                    handleEdit(e, {
+                                       id: pl.id,
+                                       new: true,
+                                       name: pl.name,
+                                    })
+                                 }
+                              >
+                                 <EditIcon style={{ fontSize: "13px" }} />
                               </button>
                            )}
 
-                           <button onClick={() => dispatch(deletePlaylist(pl.id))}>
-                              <CloseIcon fontSize="small" />
+                           <button
+                              disabled={i === 0 ? true : false}
+                              onClick={() => handleDelete(pl.id)}
+                           >
+                              <CloseIcon style={{ fontSize: "13px" }} />
                            </button>
                         </div>
                      </li>
@@ -74,6 +121,19 @@ const Playlist = ({ playlist }) => {
    );
 };
 
-const mapStateToProps = (state) => ({ playlist: state.common.playlist });
-const mapDispatchToProps = (dispatch) => bindActionCreators({ addPlaylist, editPlaylist, deletePlaylist }, dispatch);
+const mapStateToProps = (state) => ({
+   playlist: state.common.playlist,
+   activePlaylist: state.common.selectedPlaylist,
+});
+const mapDispatchToProps = (dispatch) =>
+   bindActionCreators(
+      {
+         addPlaylist,
+         editPlaylist,
+         deletePlaylist,
+         selectedPlaylist,
+         unSelectedPlaylist,
+      },
+      dispatch
+   );
 export default connect(mapStateToProps, mapDispatchToProps)(Playlist);

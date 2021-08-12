@@ -1,7 +1,8 @@
-import { SELECTED_SONG, UNSELECTED_SONG, ADD_PLAYLIST, EDIT_PLAYLIST, DELETE_PLAYLIST, CHANGE_VOLUME } from "./action";
+import { SELECTED_SONG, UNSELECTED_SONG, SELECTED_PLAYLIST, UNSELECTED_PLAYLIST, ADD_PLAYLIST, EDIT_PLAYLIST, DELETE_PLAYLIST, CHANGE_VOLUME } from "./action";
 
 const initState = {
    selectedSong: -1,
+   selectedPlaylist: -1,
    volume: 0.5,
    playlist: [
       {
@@ -17,6 +18,10 @@ const common = (state = initState, action) => {
          return { ...state, selectedSong: action.id };
       case UNSELECTED_SONG:
          return { ...state, selectedSong: -1 };
+      case SELECTED_PLAYLIST:
+         return { ...state, selectedPlaylist: action.id };
+      case UNSELECTED_PLAYLIST:
+         return { ...state, selectedPlaylist: -1 };
       case ADD_PLAYLIST:
          return { ...state, playlist: [...state.playlist, action.data] };
       case EDIT_PLAYLIST: {
